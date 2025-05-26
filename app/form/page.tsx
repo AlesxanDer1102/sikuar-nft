@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import Confetti from "react-confetti";
+import { uint256 } from "starknet";
 
 const CONTRACT_ADDRESS =
   "0x0743389379ec44eb23891ac69ca4dbf728b85803310b57df12524298759060c4";
@@ -34,7 +35,7 @@ export default function DenunciaForm() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [pin, setPin] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
-  const [message, setMessage] = useState("");
+  const [transactionMessage, setTransactionMessage] = useState("");
 
   // Nuevos estados para los campos del formulario
   const [nombre, setNombre] = useState("");
@@ -45,6 +46,8 @@ export default function DenunciaForm() {
   const [dniAgresor, setDniAgresor] = useState("");
   const [tipoEvidencia, setTipoEvidencia] = useState("");
   const [loading, setLoading] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [transactionHash, setTransactionHash] = useState("");
   const { isSignedIn, user } = useUser();
 
   if (!isSignedIn) {
@@ -58,7 +61,6 @@ export default function DenunciaForm() {
         </div>
       </div>
     );
-
   }
 
   const chipiContract = useCallAnyContract();
@@ -130,11 +132,15 @@ export default function DenunciaForm() {
       // Generar el hash
       const hash = await generateSHA256Hash(formDataString);
       const formatedHash = BigInt(`0x${hash.toLowerCase()}`);
-      console.log("Hash SHA-256 de los datos:", formatedHash.toString());
+      const hash2 = uint256.bnToUint256(formatedHash);
+
       const callData = [
         wallet.publicKey, // La clave pública del wallet como 'to'
-        formatedHash.toString(), // El hash de los datos
+        hash2.high.toString(),
+        hash2.low.toString(),
       ];
+
+      console.log("Call data para la transacción:", callData);
 
       // Aquí se podría enviar el hash a la blockchain o realizar otras acciones
 
@@ -162,9 +168,20 @@ export default function DenunciaForm() {
         ],
       };
 
-      // Ejecutar la transacción
       const result = await callFn(payload);
-      console.log("Resultado de la transacción:", result);
+
+      // Ejecutar la transacción
+      // Set transaction details for display
+      setTransactionMessage(`¡Denuncia enviada con éxito!`);
+
+      // Display success modal with transaction hash
+      setTransactionHash(result);
+      setSuccessModalVisible(true);
+
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000); // Show for 5 seconds
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000); // Show for 5 seconds
 
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000); // Show for 5 seco
@@ -225,6 +242,35 @@ export default function DenunciaForm() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-green-50 p-4">
       {showConfetti && (
         <Confetti width={window.innerWidth} height={window.innerHeight} />
+      )}
+      {successModalVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">
+              ¡Denuncia enviada con éxito!
+            </h3>
+            <p className="mb-3">
+              Tu denuncia ha sido registrada en la blockchain.
+            </p>
+            <p className="text-sm text-gray-600 break-all mb-4">
+              Hash de transacción:
+              <a
+                href={`https://starkscan.co/tx/${transactionHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {transactionHash}
+              </a>
+            </p>
+            <Button
+              className="w-full"
+              onClick={() => setSuccessModalVisible(false)}
+            >
+              Cerrar
+            </Button>
+          </div>
+        </div>
       )}
       {/* Header simplificado */}
       <div className="max-w-7xl mx-auto mb-6">

@@ -14,8 +14,27 @@ import {
   Users,
   Layers,
 } from "lucide-react";
+import { RpcProvider } from "starknet";
+
+const CONTRACT_ADDRESS =
+  "0x0743389379ec44eb23891ac69ca4dbf728b85803310b57df12524298759060c4";
+
 
 export default function HomePage() {
+
+  // const fetchDenuncias = async ()=> {
+  //   try{
+  //     const provider = new RpcProvider({nodeUrl:"https://starknet-mainnet.public.blastapi.io/rpc/v0_8"})
+
+  //     const latestBlock = await provider.getBlockLatestAccepted();
+  //     const events = await provider.getEvents({
+  //       address:CONTRACT_ADDRESS,
+  //       keys:
+  //     })
+
+  //   }
+  // }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-green-50 p-4">
       {/* Header */}
@@ -255,17 +274,10 @@ export default function HomePage() {
               <div className="flex items-center gap-2 mb-3">
                 <Users className="w-5 h-5 text-teal-600" />
                 <h3 className="font-medium text-gray-700">
-                  Respaldo comunitario
+                  Denuncias Recientes
                 </h3>
               </div>
-              <p className="text-sm text-gray-600 italic">
-                "SIKUAR ha permitido que nuestra comunidad pueda documentar
-                casos de manera segura, brindando confianza a las víctimas para
-                hablar."
-              </p>
-              <p className="text-xs text-right mt-2 text-gray-500">
-                — Coordinadora de Justicia Comunitaria
-              </p>
+
             </CardContent>
           </Card>
         </div>
