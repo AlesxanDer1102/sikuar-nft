@@ -47,6 +47,20 @@ export default function DenunciaForm() {
   const [loading, setLoading] = useState(false);
   const { isSignedIn, user } = useUser();
 
+  if (!isSignedIn) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-green-50">
+        <div className="text-center p-6 bg-white rounded-lg shadow-lg">
+          <h1 className="text-2xl font-bold mb-4">Por favor, inicia sesión</h1>
+          <p className="text-gray-600 mb-4">
+            Necesitas estar conectado para enviar una denuncia.
+          </p>
+        </div>
+      </div>
+    );
+
+  }
+
   const chipiContract = useCallAnyContract();
   const { getToken } = useAuth();
   // Debugging
@@ -600,6 +614,7 @@ export default function DenunciaForm() {
           <Button
             className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 text-lg font-medium rounded-xl"
             onClick={handleSubmit}
+            disabled={loading || !isSignedIn || !pin}
           >
             Enviar
           </Button>
